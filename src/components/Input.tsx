@@ -1,6 +1,6 @@
 // Tremor Input [v2.0.0]
 
-import React from "react";
+import React, { forwardRef } from "react";
 import { RiEyeFill, RiEyeOffFill, RiSearchLine } from "@remixicon/react";
 import { tv, type VariantProps } from "tailwind-variants";
 
@@ -50,9 +50,10 @@ interface InputProps
 	extends React.InputHTMLAttributes<HTMLInputElement>,
 		VariantProps<typeof inputStyles> {
 	inputClassName?: string;
+	label?: string;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Input = forwardRef<HTMLInputElement, InputProps>(
 	(
 		{
 			className,
@@ -60,8 +61,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			hasError,
 			enableStepper = true,
 			type,
+			label,
 			...props
-		}: InputProps,
+		},
 		forwardedRef
 	) => {
 		const [typeState, setTypeState] = React.useState(type);
@@ -70,89 +72,94 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		const isSearch = type === "search";
 
 		return (
-			<div
-				className={cx("relative w-full", className)}
-				tremor-id="tremor-raw"
-			>
-				<input
-					ref={forwardedRef}
-					type={isPassword ? typeState : type}
-					className={cx(
-						inputStyles({
-							hasError,
-							enableStepper,
-						}),
-						{
-							"pl-8": isSearch,
-							"pr-10": isPassword,
-						},
-						inputClassName
-					)}
-					{...props}
-				/>
-				{isSearch && (
-					<div
-						className={cx(
-							// base
-							"pointer-events-none absolute bottom-0 left-2 flex h-full items-center justify-center",
-							// text color
-							"text-gray-400 dark:text-gray-600"
-						)}
-					>
-						<RiSearchLine
-							className="size-[1.125rem] shrink-0"
-							aria-hidden="true"
-						/>
-					</div>
+			<div className="space-y-1">
+				{label && (
+					<label className="block text-sm text-text-secondary">{label}</label>
 				)}
-				{isPassword && (
-					<div
+				<div
+					className={cx("relative w-full", className)}
+					tremor-id="tremor-raw"
+				>
+					<input
+						ref={forwardedRef}
+						type={isPassword ? typeState : type}
 						className={cx(
-							"absolute bottom-0 right-0 flex h-full items-center justify-center px-3"
+							inputStyles({
+								hasError,
+								enableStepper,
+							}),
+							{
+								"pl-8": isSearch,
+								"pr-10": isPassword,
+							},
+							inputClassName
 						)}
-					>
-						<button
-							aria-label="Change password visibility"
+						{...props}
+					/>
+					{isSearch && (
+						<div
 							className={cx(
 								// base
-								"h-fit w-fit rounded-xs outline-hidden transition-all",
-								// text
-								"text-gray-400 dark:text-gray-600",
-								// hover
-								"hover:text-gray-500 dark:hover:text-gray-500",
-								focusRing
+								"pointer-events-none absolute bottom-0 left-2 flex h-full items-center justify-center",
+								// text color
+								"text-gray-400 dark:text-gray-600"
 							)}
-							type="button"
-							onClick={() => {
-								setTypeState(
-									typeState ===
-										"password"
-										? "text"
-										: "password"
-								);
-							}}
 						>
-							<span className="sr-only">
-								{typeState ===
-								"password"
-									? "Show password"
-									: "Hide password"}
-							</span>
-							{typeState ===
-							"password" ? (
-								<RiEyeFill
-									aria-hidden="true"
-									className="size-5 shrink-0"
-								/>
-							) : (
-								<RiEyeOffFill
-									aria-hidden="true"
-									className="size-5 shrink-0"
-								/>
+							<RiSearchLine
+								className="size-[1.125rem] shrink-0"
+								aria-hidden="true"
+							/>
+						</div>
+					)}
+					{isPassword && (
+						<div
+							className={cx(
+								"absolute bottom-0 right-0 flex h-full items-center justify-center px-3"
 							)}
-						</button>
-					</div>
-				)}
+						>
+							<button
+								aria-label="Change password visibility"
+								className={cx(
+									// base
+									"h-fit w-fit rounded-xs outline-hidden transition-all",
+									// text
+									"text-gray-400 dark:text-gray-600",
+									// hover
+									"hover:text-gray-500 dark:hover:text-gray-500",
+									focusRing
+								)}
+								type="button"
+								onClick={() => {
+									setTypeState(
+										typeState ===
+											"password"
+											? "text"
+											: "password"
+									);
+								}}
+							>
+								<span className="sr-only">
+									{typeState ===
+									"password"
+										? "Show password"
+										: "Hide password"}
+								</span>
+								{typeState ===
+								"password" ? (
+									<RiEyeFill
+										aria-hidden="true"
+										className="size-5 shrink-0"
+									/>
+								) : (
+									<RiEyeOffFill
+										aria-hidden="true"
+										className="size-5 shrink-0"
+									/>
+								)}
+							</button>
+						</div>
+					)}
+				</div>
 			</div>
 		);
 	}

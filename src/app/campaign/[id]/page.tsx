@@ -5,6 +5,8 @@ import Comments from "./components/Comments";
 import InvestCard from "./components/InvestCard";
 import ShareButton from "./components/ShareButton";
 import { campaignStatus } from "@/lib/enums";
+import Navbar from "@/components/Navbar";
+
 export default async function Campaign({
 	params,
 }: {
@@ -31,6 +33,7 @@ export default async function Campaign({
 		rating: 4.5,
 		status: campaignStatus.Active,
 	};
+
 	let statusClassName;
 	switch (campaign.status) {
 		case campaignStatus.Funded:
@@ -43,109 +46,76 @@ export default async function Campaign({
 		default:
 			statusClassName = "text-primary bg-primary/10";
 	}
-	return (
-		<main className="bg-bg min-h-screen w-full text-text-primary">
-			{/* Hero Section */}
-			<div className="bg-card border-b border-text-secondary/20">
-				<div className="max-w-7xl mx-auto p-6">
-					<div className="flex items-center justify-between mb-4">
-						<div className="space-y-2">
-							<div className="flex items-center gap-4">
-								<Image
-									src={
-										campaign.logo.trim()
-											.length >
-										0
-											? campaign.logo
-											: "/default-startup-logo.svg"
-									}
-									alt="Startup Logo"
-									width={
-										36
-									}
-									height={
-										36
-									}
-								/>
-								<h4 className="font-medium text-xl text-text-secondary">
-									{
-										campaign.startupName
-									}
-								</h4>
-							</div>
-							<h1 className="text-3xl font-bold">
-								{campaign.name}
-							</h1>
-						</div>
-						<div className="flex items-center gap-3">
-							<ShareButton />
-							{/* <button className="p-2 hover:bg-text-secondary/10 rounded-lg transition-colors">
-								<RiBookmarkLine className="size-6" />
-							</button> */}
 
-							<span
-								className={`rounded-lg px-4 py-2 text-lg font-medium cursor-default select-none ${statusClassName}`}
-							>
-								{
-									campaign.status
-								}
-							</span>
+	return (
+		<div className="min-h-screen bg-bg">
+			<Navbar />
+			<main className="pt-16"> {/* Add padding-top to account for fixed navbar */}
+				{/* Hero Section */}
+				<div className="bg-card border-b border-text-secondary/20">
+					<div className="max-w-7xl mx-auto px-6 py-8">
+						<div className="flex items-center justify-between mb-4">
+							<div className="space-y-2">
+								<div className="flex items-center gap-4">
+									<Image
+										src={campaign.logo}
+										alt="Startup Logo"
+										width={36}
+										height={36}
+										className="rounded-lg border border-text-secondary/20"
+									/>
+									<h4 className="font-medium text-xl text-text-secondary">
+										{campaign.startupName}
+									</h4>
+								</div>
+								<h1 className="text-3xl font-bold text-text-primary">
+									{campaign.name}
+								</h1>
+							</div>
+							<div className="flex items-center gap-3">
+								<ShareButton />
+								<span
+									className={`rounded-lg px-4 py-2 text-lg font-medium cursor-default select-none ${statusClassName}`}
+								>
+									{campaign.status}
+								</span>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
-			{/* Main Content */}
-			<div className="max-w-7xl mx-auto p-6">
-				<div className="grid grid-cols-[1fr_400px] gap-8">
-					<aside className="space-y-8">
-						<FundingProgress
-							goal={
-								campaign.fundingGoal
-							}
-							investors={
-								campaign.investors
-							}
-							progress={
-								campaign.progress
-							}
-							daysLeft={Math.round(
-								(campaign.endDate.getTime() -
-									new Date().getTime()) /
-									(1000 *
-										60 *
-										60 *
-										24)
-							)}
-							minInvestment={
-								campaign.minimumInvestment
-							}
-						/>
-						<CampaignDetails
-							description={
-								campaign.description
-							}
-							startDate={
-								campaign.startDate
-							}
-							endDate={
-								campaign.endDate
-							}
-							objective={
-								campaign.objective
-							}
-							rating={campaign.rating}
-							startupId={
-								campaign.startupId
-							}
-						/>
-						<Comments />
-					</aside>
-					<aside>
-						<InvestCard />
-					</aside>
+				{/* Main Content */}
+				<div className="max-w-7xl mx-auto px-6 py-8">
+					<div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+						<aside className="space-y-8">
+							<FundingProgress
+								goal={campaign.fundingGoal}
+								investors={campaign.investors}
+								progress={campaign.progress}
+								daysLeft={Math.round(
+									(campaign.endDate.getTime() - new Date().getTime()) /
+										(1000 * 60 * 60 * 24)
+								)}
+								minInvestment={campaign.minimumInvestment}
+							/>
+							<CampaignDetails
+								description={campaign.description}
+								startDate={campaign.startDate}
+								endDate={campaign.endDate}
+								objective={campaign.objective}
+								rating={campaign.rating}
+								startupId={campaign.startupId}
+							/>
+							<Comments />
+						</aside>
+						<aside className="lg:relative">
+							<div className="lg:sticky lg:top-24">
+								<InvestCard />
+							</div>
+						</aside>
+					</div>
 				</div>
-			</div>
-		</main>
+			</main>
+		</div>
 	);
 }
