@@ -1,21 +1,10 @@
-import { ProgressBar } from "@/components/ProgressBar";
-import {
-	RiCalendarLine,
-	RiFileTextLine,
-	RiFocus2Line,
-	RiThumbUpLine,
-	RiUserLine,
-	RiShareLine,
-	RiBookmarkLine,
-} from "@remixicon/react";
 import Image from "next/image";
-import Link from "next/link";
 import FundingProgress from "./components/FundingProgress";
 import CampaignDetails from "./components/CampaignDetails";
 import Comments from "./components/Comments";
 import InvestCard from "./components/InvestCard";
-import { headers } from "next/headers";
 import ShareButton from "./components/ShareButton";
+import { campaignStatus } from "@/lib/enums";
 export default async function Campaign({
 	params,
 }: {
@@ -40,8 +29,20 @@ export default async function Campaign({
 		investors: 128,
 		minimumInvestment: 0.05,
 		rating: 4.5,
-		status: "Active",
+		status: campaignStatus.Active,
 	};
+	let statusClassName;
+	switch (campaign.status) {
+		case campaignStatus.Funded:
+			statusClassName = "text-accent bg-accent/10";
+			break;
+		case campaignStatus.Failed:
+			statusClassName = "text-red-600 bg-red-600/10";
+			break;
+		case campaignStatus.Active:
+		default:
+			statusClassName = "text-primary bg-primary/10";
+	}
 	return (
 		<main className="bg-bg min-h-screen w-full text-text-primary">
 			{/* Hero Section */}
@@ -51,7 +52,13 @@ export default async function Campaign({
 						<div className="space-y-2">
 							<div className="flex items-center gap-4">
 								<Image
-									src="/default-startup-logo.svg"
+									src={
+										campaign.logo.trim()
+											.length >
+										0
+											? campaign.logo
+											: "/default-startup-logo.svg"
+									}
 									alt="Startup Logo"
 									width={
 										36
@@ -75,7 +82,10 @@ export default async function Campaign({
 							{/* <button className="p-2 hover:bg-text-secondary/10 rounded-lg transition-colors">
 								<RiBookmarkLine className="size-6" />
 							</button> */}
-							<span className="rounded-lg bg-primary/10 text-primary px-4 py-2 text-lg font-medium">
+
+							<span
+								className={`rounded-lg px-4 py-2 text-lg font-medium cursor-default select-none ${statusClassName}`}
+							>
 								{
 									campaign.status
 								}
