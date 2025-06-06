@@ -5,6 +5,11 @@ import Image from 'next/image';
 import { Campaign } from '@/types';
 import { RiTimeLine, RiGroupLine, RiMapPinLine } from '@remixicon/react';
 import { useState, useEffect } from 'react';
+import {
+  calculateCampaignProgress,
+  formatCampaignAmount,
+  getCampaignStatusColor
+} from '@/lib/campaignUtils';
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -17,33 +22,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
     setIsMounted(true);
   }, []);
 
-  const progressPercentage = Math.min((campaign.amountRaised / campaign.goalAmount) * 100, 100);
-  
-  const getStateColor = (state: Campaign['currentState']) => {
-    switch (state) {
-      case 'active':
-        return 'bg-accent text-white';
-      case 'completed':
-        return 'bg-green-500 text-white';
-      case 'failed':
-        return 'bg-red-500 text-white';
-      case 'draft':
-        return 'bg-gray-500 text-white';
-      default:
-        return 'bg-gray-500 text-white';
-    }
-  };
-
-  const formatAmount = (amount: number) => {
-    if (amount >= 1000000) {
-      const millions = Math.round((amount / 1000000) * 10) / 10;
-      return `$${millions}M`;
-    } else if (amount >= 1000) {
-      const thousands = Math.round(amount / 1000);
-      return `$${thousands}K`;
-    }
-    return `$${new Intl.NumberFormat('en-US').format(amount)}`;
-  };
+  const { progressPercentage } = calculateCampaignProgress(campaign);
 
   const formatPercentage = (percentage: number) => {
     return Math.round(percentage);
@@ -68,7 +47,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-3 left-3">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStateColor(campaign.currentState)}`}>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCampaignStatusColor(campaign.currentState)}`}>
               {campaign.currentState.charAt(0).toUpperCase() + campaign.currentState.slice(1)}
             </span>
           </div>
@@ -110,7 +89,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-text-primary">
-                {isMounted ? formatAmount(campaign.amountRaised) : '$---'} raised
+                {isMounted ? formatCampaignAmount(campaign.amountRaised) : '$---'} raised
               </span>
               <span className="text-sm text-text-secondary">
                 {isMounted ? `${formatPercentage(progressPercentage)}%` : '---%'}
@@ -124,7 +103,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             </div>
             <div className="flex justify-between items-center mt-2">
               <span className="text-xs text-text-secondary">
-                Goal: {isMounted ? formatAmount(campaign.goalAmount) : '$---'}
+                Goal: {isMounted ? formatCampaignAmount(campaign.goalAmount) : '$---'}
               </span>
               <div className="flex items-center space-x-1">
                 <RiGroupLine className="h-3 w-3 text-text-secondary" />
