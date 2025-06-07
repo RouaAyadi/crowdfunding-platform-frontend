@@ -1,7 +1,7 @@
 import { Campaign, Comment } from '@/types';
 import { transformCampaignForFrontend } from '../campaignUtils';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300';
 
 export interface CreateCampaignData {
   title: string;
