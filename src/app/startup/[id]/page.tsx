@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { Startup, StartupReview } from '@/types';
+import { useStartup } from '@/hooks/useStartups';
+import { formatCampaignAmount } from '@/lib/campaignUtils';
 import { 
   RiStarFill, 
   RiStarLine, 
@@ -21,121 +23,52 @@ import {
   RiTimeLine
 } from '@remixicon/react';
 
-// Mock data for startup
-const mockStartup: Startup = {
-  id: '1',
-  name: 'MedTech Innovations',
-  logo: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=100&h=100&fit=crop',
-  coverImage: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1200&h=400&fit=crop',
-  field: 'Healthcare Technology',
-  description: 'Revolutionizing healthcare through AI-powered diagnostic tools and patient care solutions.',
-  longDescription: 'MedTech Innovations is at the forefront of healthcare technology, developing cutting-edge AI solutions that enhance diagnostic accuracy and improve patient outcomes. Our team of experienced medical professionals and AI engineers work together to create tools that bridge the gap between traditional medicine and modern technology. We believe that technology should augment human expertise, not replace it, and our products are designed with this philosophy in mind.',
-  motives: [
-    'Improve diagnostic accuracy by 40% using AI algorithms',
-    'Reduce healthcare costs through early detection and prevention',
-    'Make advanced medical technology accessible to underserved communities',
-    'Bridge the gap between medical professionals and AI technology',
-    'Create sustainable healthcare solutions for the future'
-  ],
-  foundedYear: 2021,
-  location: 'San Francisco, CA',
-  teamSize: 25,
-  website: 'https://medtech-innovations.com',
-  socialLinks: {
-    linkedin: 'https://linkedin.com/company/medtech-innovations',
-    twitter: 'https://twitter.com/medtech_innov',
-    facebook: 'https://facebook.com/medtechinnovations'
-  },
-  totalRaised: 2500000,
-  activeCampaigns: 2,
-  completedCampaigns: 3,
-  averageRating: 4.7,
-  totalReviews: 89,
-  reviews: [
-    {
-      id: '1',
-      investorName: 'Sarah Johnson',
-      investorAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop',
-      rating: 5,
-      comment: 'Incredible team with a clear vision. Their AI diagnostic tool has shown remarkable results in clinical trials.',
-      date: '2024-01-15',
-      investmentAmount: 50000
-    },
-    {
-      id: '2',
-      investorName: 'Michael Chen',
-      investorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop',
-      rating: 5,
-      comment: 'The potential impact on healthcare is enormous. Great execution and strong market validation.',
-      date: '2024-01-10',
-      investmentAmount: 25000
-    },
-    {
-      id: '3',
-      investorName: 'Dr. Emily Rodriguez',
-      investorAvatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=50&h=50&fit=crop',
-      rating: 4,
-      comment: 'As a practicing physician, I can see the real value this technology brings to patient care.',
-      date: '2024-01-08',
-      investmentAmount: 15000
-    }
-  ],
-  keyMetrics: [
-    { label: 'Revenue Growth', value: '300% YoY' },
-    { label: 'Customer Retention', value: '95%' },
-    { label: 'Market Size', value: '$50B' },
-    { label: 'Patents Filed', value: '12' }
-  ],
-  milestones: [
-    {
-      title: 'FDA Approval Received',
-      description: 'Received FDA clearance for our AI diagnostic platform',
-      date: '2024-01-20',
-      completed: true
-    },
-    {
-      title: 'Series A Funding',
-      description: 'Completed $5M Series A funding round',
-      date: '2023-11-15',
-      completed: true
-    },
-    {
-      title: 'Clinical Trial Results',
-      description: 'Published positive results from Phase II clinical trials',
-      date: '2023-09-30',
-      completed: true
-    },
-    {
-      title: 'International Expansion',
-      description: 'Launch operations in European markets',
-      date: '2024-03-15',
-      completed: false
-    },
-    {
-      title: 'AI Platform 2.0',
-      description: 'Release next-generation AI diagnostic platform',
-      date: '2024-06-30',
-      completed: false
-    }
-  ]
-};
+
 
 export default function StartupProfilePage() {
   const params = useParams();
-  const [startup, setStartup] = useState<Startup | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'milestones'>('overview');
 
-  useEffect(() => {
-    // In a real app, you would fetch the startup data based on the ID
-    setStartup(mockStartup);
-  }, [params.id]);
+  // Fetch startup data from API
+  const { startup, loading, error, refetch } = useStartup(params.id as string);
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg">
+        <Navbar />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-text-secondary">Loading startup...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-bg">
+        <Navbar />
+        <div className="flex flex-col items-center justify-center h-64">
+          <div className="text-red-500 mb-4">Error: {error}</div>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show not found state
   if (!startup) {
     return (
       <div className="min-h-screen bg-bg">
         <Navbar />
         <div className="flex items-center justify-center h-64">
-          <div className="text-text-secondary">Loading...</div>
+          <div className="text-text-secondary">Startup not found</div>
         </div>
       </div>
     );
@@ -365,7 +298,7 @@ export default function StartupProfilePage() {
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Total Raised</span>
                   <span className="font-semibold text-text-primary">
-                    ${startup.totalRaised.toLocaleString()}
+                    {formatCampaignAmount(startup.totalRaised || 0)}
                   </span>
                 </div>
                 <div className="flex justify-between">
