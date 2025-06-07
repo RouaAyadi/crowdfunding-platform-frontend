@@ -9,8 +9,7 @@ export function transformCampaignForFrontend(backendCampaign: any): Campaign {
   const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
   return {
-    _id: backendCampaign._id,
-    id: backendCampaign._id,
+    id: backendCampaign.id || backendCampaign._id,
     title: backendCampaign.title,
     name: backendCampaign.title, // Frontend compatibility
     description: backendCampaign.description,
@@ -24,7 +23,7 @@ export function transformCampaignForFrontend(backendCampaign: any): Campaign {
     image: backendCampaign.image || '/placeholder-campaign.jpg',
     address: backendCampaign.address,
     startup: backendCampaign.startup,
-    startupId: typeof backendCampaign.startup === 'object' ? backendCampaign.startup._id : backendCampaign.startup,
+    startupId: typeof backendCampaign.startup === 'object' ? (backendCampaign.startup._id || backendCampaign.startup.id) : backendCampaign.startup,
     startupName: typeof backendCampaign.startup === 'object' ? backendCampaign.startup.name : 'Unknown Startup',
     startDate: backendCampaign.startDate,
     endDate: backendCampaign.endDate,

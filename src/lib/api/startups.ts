@@ -58,7 +58,9 @@ class StartupAPI {
     
     return {
       ...response,
-      startups: response.startups || response, // Handle different response formats
+      startups: (response.startups || response).map(startup => 
+        this.transformStartupForFrontend(startup)
+      ),
     };
   }
 
@@ -82,7 +84,6 @@ class StartupAPI {
 
   private transformStartupForFrontend(backendStartup: any): Startup {
     return {
-      _id: backendStartup._id || backendStartup.id,
       id: backendStartup.id || backendStartup._id,
       walletAddress: backendStartup.walletAddress,
       role: 'startup' as const,

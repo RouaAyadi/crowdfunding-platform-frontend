@@ -1,5 +1,4 @@
 export interface Campaign {
-  _id: string;
   id: string;
   title: string;
   name?: string;
@@ -54,7 +53,6 @@ export interface StartupReview {
 }
 
 export interface Startup {
-  _id: string;
   id: string;
   walletAddress: string;
   role: 'startup';
