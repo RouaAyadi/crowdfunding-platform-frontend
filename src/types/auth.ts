@@ -12,7 +12,7 @@ export interface AuthState {
 export interface LoginDto {
   walletAddress: string;
   signature: string;
-  nonce: string;
+  role: Roles;
 }
 
 export interface RegisterDto {
@@ -32,7 +32,7 @@ export interface RegisterDto {
 }
 
 export interface AuthResponse {
-  token: string;
+  access_token: string;
   user: {
     walletAddress: string;
     role: Roles;

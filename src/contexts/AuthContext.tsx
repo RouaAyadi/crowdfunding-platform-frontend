@@ -92,13 +92,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authApi.register(registerData);
       
       // Store auth data
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.access_token);
       localStorage.setItem('walletAddress', response.user.walletAddress);
       localStorage.setItem('role', response.user.role);
 
       setState({
         isAuthenticated: true,
-        token: response.token,
+        token: response.access_token,
         walletAddress: response.user.walletAddress,
         role: response.user.role,
         loading: false,
@@ -145,19 +145,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const loginData: LoginDto = {
         walletAddress,
         signature,
-        nonce,
+        role,
       };
 
       const response = await authApi.login(loginData);
 
       // Store auth data
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.access_token);
       localStorage.setItem('walletAddress', response.user.walletAddress);
       localStorage.setItem('role', response.user.role);
 
       setState({
         isAuthenticated: true,
-        token: response.token,
+        token: response.access_token,
         walletAddress: response.user.walletAddress,
         role: response.user.role,
         loading: false,
