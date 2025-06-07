@@ -21,7 +21,7 @@ export default function ShareButton() {
 						description:
 							"Link copied to clipboard!",
 						variant: "success",
-						duration: 2000,
+						duration: 20000,
 					});
 				}}
 			>
@@ -30,14 +30,3 @@ export default function ShareButton() {
 		</>
 	);
 }
-const ToastPreview = () => (
-	<ToastProvider>
-		<Toast
-			open
-			title="Success"
-			description="Link copied to clipboard!"
-			variant="success"
-			className="mt-0"
-		/>
-	</ToastProvider>
-);
