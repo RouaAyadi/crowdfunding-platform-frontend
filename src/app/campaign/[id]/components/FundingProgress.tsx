@@ -18,9 +18,9 @@ export default function FundingProgress({
 		<div className="bg-card rounded-xl border border-text-secondary/20 p-6 space-y-6">
 			<div>
 				<div className="flex items-center justify-between font-medium text-2xl mb-2">
-					<p>{progress} ETH</p>
+					<p>${progress / 1000}K</p>
 					<p className="text-text-secondary">
-						{goal} ETH
+						${goal / 1000}k
 					</p>
 				</div>
 				<ProgressBar

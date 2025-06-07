@@ -2,37 +2,36 @@
 import { useState } from "react";
 import { RiSendPlaneLine, RiUserLine } from "@remixicon/react";
 import { Input } from "@/components/Input";
+import { Comment as CommentType, Investor } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { Roles } from "@/types/roles";
+import { campaignAPI } from "@/lib/api/campaigns";
 
-type Comment = {
-	id: number;
-	user: string;
-	content: string;
-	timestamp: string;
-};
+interface CommentsProps {
+	comments: CommentType[];
+	campaignId: string;
+}
 
-export default function Comments() {
+export default function Comments({ comments, campaignId }: CommentsProps) {
 	const [newComment, setNewComment] = useState("");
-	const mockComments: Comment[] = [
-		{
-			id: 1,
-			user: "Investor1",
-			content: "Great project! Looking forward to seeing the progress.",
-			timestamp: "2 hours ago",
-		},
-		{
-			id: 2,
-			user: "CryptoWhale",
-			content: "Interesting use case. What's the expected timeline for the facility?",
-			timestamp: "1 day ago",
-		},
-	];
+	const { isAuthenticated, role } = useAuth();
+	
+	const isInvestor = isAuthenticated && role === Roles.INVESTOR;
 
-	const handleSubmitComment = () => {
-		// send post request to backend
+	const handleSubmitComment = async () => {
+		if (!newComment.trim() || !isInvestor) return;
+
+		try {
+			const response = await campaignAPI.addComment(campaignId, newComment);
+
+			// Clear the input after successful submission
+			setNewComment("");
+			// You might want to trigger a refetch of the campaign data here
+			// or implement optimistic updates
+		} catch (error) {
+			console.error('Error posting comment:', error);
+		}
 	};
-
-	// get from db
-	const isInvestor = true;
 
 	return (
 		<div className="space-y-6">
@@ -41,7 +40,11 @@ export default function Comments() {
 			<div className="flex flex-col gap-2">
 				<div className="flex gap-4">
 					<Input
-						placeholder="Add a comment..."
+						placeholder={isAuthenticated 
+							? isInvestor 
+								? "Add a comment..." 
+								: "Only investors can comment"
+							: "Please connect your wallet to comment"}
 						value={newComment}
 						onChange={(e) =>
 							setNewComment(
@@ -69,17 +72,22 @@ export default function Comments() {
 					</button>
 				</div>
 
-				{!isInvestor && (
+				{!isAuthenticated && (
 					<p className="text-sm text-gray-500">
-						Invest to join the conversation.
+						Connect your wallet to join the conversation.
+					</p>
+				)}
+				{isAuthenticated && !isInvestor && (
+					<p className="text-sm text-gray-500">
+						Only investors can comment on campaigns.
 					</p>
 				)}
 			</div>
 
 			<div className="space-y-4">
-				{mockComments.map((comment) => (
+				{comments.map((comment) => (
 					<div
-						key={comment.id}
+						key={comment._id}
 						className="bg-card rounded-lg p-4 space-y-2 border border-text-secondary/10"
 					>
 						<div className="flex items-center gap-2">
@@ -88,22 +96,33 @@ export default function Comments() {
 							</div>
 							<div>
 								<p className="font-medium">
-									{
-										comment.user
-									}
+									{typeof comment.author === 'string' 
+										? comment.author 
+										: comment.author.nickname || comment.author.walletAddress}
 								</p>
 								<p className="text-sm text-text-secondary">
-									{
-										comment.timestamp
-									}
+									{new Date(comment.createdAt).toLocaleDateString(undefined, {
+										year: 'numeric',
+										month: 'long',
+										day: 'numeric',
+										hour: '2-digit',
+										minute: '2-digit'
+									})}
+									{comment.isEdited && ' (edited)'}
 								</p>
 							</div>
 						</div>
 						<p className="text-text-secondary">
-							{comment.content}
+							{comment.text}
 						</p>
 					</div>
 				))}
+
+				{comments.length === 0 && (
+					<p className="text-center text-text-secondary py-4">
+						No comments yet. Be the first to comment!
+					</p>
+				)}
 			</div>
 		</div>
 	);
