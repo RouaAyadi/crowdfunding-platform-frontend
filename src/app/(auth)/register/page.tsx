@@ -5,6 +5,8 @@ import { Input } from "@/components/Input";
 import RoleToggle from "@/components/auth/RoleToggle";
 import ConnectWalletButton from "@/components/auth/ConnectWalletButton";
 import { RiArrowLeftLine, RiAddLine, RiCloseLine } from "@remixicon/react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Roles } from "@/types/roles";
 
 const EMPLOYEE_COUNT_OPTIONS = [
 	"<10",
@@ -17,8 +19,12 @@ const EMPLOYEE_COUNT_OPTIONS = [
 ];
 
 export default function RegisterPage() {
-	const [role, setRole] = useState<"investor" | "startup">("investor");
-	const [nickname, setNickname] = useState("");
+	const { register, loading, error } = useAuth();
+	const [role, setRole] = useState<Roles>(Roles.INVESTOR);
+	const [investorForm, setInvestorForm] = useState({
+		name: "",
+		nickname: "",
+	});
 	const [startupForm, setStartupForm] = useState({
 		name: "",
 		location: "",
@@ -50,6 +56,33 @@ export default function RegisterPage() {
 		}));
 	};
 
+	const handleRegister = async () => {
+		try {
+			if (role === Roles.INVESTOR) {
+				await register({
+					role,
+					investorData: {
+						name: investorForm.name,
+						nickname: investorForm.nickname,
+					},
+				});
+			} else {
+				await register({
+					role,
+					startupData: {
+						name: startupForm.name,
+						location: startupForm.location,
+						website: startupForm.website,
+						bio: startupForm.bio,
+						mission: startupForm.goals.filter(goal => goal.trim() !== ""),
+					},
+				});
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	return (
 		<div className="space-y-6">
 			<RoleToggle selectedRole={role} onRoleChange={setRole} />
@@ -57,13 +90,20 @@ export default function RegisterPage() {
 			<div className="space-y-6">
 				<ConnectWalletButton />
 
-				{role === "investor" ? (
+				{role === Roles.INVESTOR ? (
 					<div className="space-y-4">
+						<Input
+							label="Full Name"
+							placeholder="Enter your full name"
+							value={investorForm.name}
+							onChange={(e) => setInvestorForm(prev => ({ ...prev, name: e.target.value }))}
+							required
+						/>
 						<Input
 							label="Nickname (optional)"
 							placeholder="How should we call you?"
-							value={nickname}
-							onChange={(e) => setNickname(e.target.value)}
+							value={investorForm.nickname}
+							onChange={(e) => setInvestorForm(prev => ({ ...prev, nickname: e.target.value }))}
 						/>
 					</div>
 				) : (
@@ -201,6 +241,18 @@ export default function RegisterPage() {
 							/>
 						</div>
 					</form>
+				)}
+
+				<button
+					onClick={handleRegister}
+					disabled={loading}
+					className="w-full bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					{loading ? "Registering..." : "Register"}
+				</button>
+
+				{error && (
+					<p className="text-red-500 text-sm text-center">{error}</p>
 				)}
 			</div>
 
