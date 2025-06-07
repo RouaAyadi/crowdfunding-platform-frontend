@@ -10,7 +10,7 @@ import { Roles } from '@/types/roles';
 interface AuthContextType extends AuthState {
   connectWallet: () => Promise<string>;
   register: (data: Omit<RegisterDto, 'walletAddress'>) => Promise<void>;
-  login: () => Promise<void>;
+  login: (role: Roles) => Promise<void>;
   logout: () => void;
 }
 
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check if user is already authenticated
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth-token');
     const walletAddress = localStorage.getItem('walletAddress');
     const role = localStorage.getItem('role') as Roles | null;
 
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authApi.register(registerData);
       
       // Store auth data
-      localStorage.setItem('token', response.access_token);
+      localStorage.setItem('auth-token', response.access_token);
       localStorage.setItem('walletAddress', response.user.walletAddress);
       localStorage.setItem('role', response.user.role);
 
@@ -124,10 +124,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async () => {
+  const login = async (role: Roles) => {
     try {
       const walletAddress = await connectWallet();
-      const { role } = state;
       
       if (!role) {
         throw new Error('Please select a role');
@@ -151,7 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authApi.login(loginData);
 
       // Store auth data
-      localStorage.setItem('token', response.access_token);
+      localStorage.setItem('auth-token', response.access_token);
       localStorage.setItem('walletAddress', response.user.walletAddress);
       localStorage.setItem('role', response.user.role);
 
@@ -184,9 +183,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    // Clear all auth-related items
+    localStorage.removeItem('auth-token');
     localStorage.removeItem('walletAddress');
     localStorage.removeItem('role');
+    localStorage.removeItem('token'); // Remove the undefined token
+    localStorage.removeItem('auth-storage'); // Remove duplicate storage
 
     setState(initialState);
     router.push('/login');
@@ -197,6 +199,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       variant: 'success',
     });
   };
+
+  // Clean up any stale tokens on mount
+  useEffect(() => {
+    // Remove any stale or duplicate tokens
+    localStorage.removeItem('token');
+    localStorage.removeItem('auth-storage');
+  }, []);
 
   return (
     <AuthContext.Provider

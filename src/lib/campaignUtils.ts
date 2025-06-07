@@ -38,10 +38,15 @@ export function transformCampaignForFrontend(backendCampaign: any): Campaign {
 
 export function calculateCampaignProgress(campaign: Campaign): {
   progressPercentage: number;
+  daysLeft: number;
   isCompleted: boolean;
   isFailed: boolean;
   isActive: boolean;
 } {
+  const now = new Date();
+  const endDate = new Date(campaign.endDate);
+  const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
   const progressPercentage = Math.min((campaign.currentAmount / campaign.targetAmount) * 100, 100);
   const isCompleted = campaign.status === 'completed' || campaign.status === 'funded';
   const isFailed = campaign.status === 'failed';
@@ -49,6 +54,7 @@ export function calculateCampaignProgress(campaign: Campaign): {
 
   return {
     progressPercentage: Math.round(progressPercentage * 100) / 100,
+    daysLeft,
     isCompleted,
     isFailed,
     isActive,

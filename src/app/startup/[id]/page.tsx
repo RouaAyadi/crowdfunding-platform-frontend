@@ -124,7 +124,7 @@ export default function StartupProfilePage() {
                   <div>
                     <h1 className="text-3xl font-bold text-text-primary mb-2">{startup.name}</h1>
                     <p className="text-lg text-text-secondary mb-3">{startup.field}</p>
-                    <p className="text-text-primary mb-4">{startup.description}</p>
+                    <p className="text-text-primary mb-4">{startup.bio || startup.description}</p>
                     
                     <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
                       <div className="flex items-center space-x-1">
@@ -202,7 +202,7 @@ export default function StartupProfilePage() {
                 <div className="bg-card rounded-lg p-6 border border-gray-100">
                   <h3 className="text-xl font-semibold text-text-primary mb-4">Our Mission & Goals</h3>
                   <ul className="space-y-3">
-                    {startup.motives.map((motive, index) => (
+                    {(startup.motives || []).map((motive, index) => (
                       <li key={index} className="flex items-start space-x-3">
                         <RiCheckLine className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
                         <span className="text-text-secondary">{motive}</span>
@@ -215,7 +215,7 @@ export default function StartupProfilePage() {
                 <div className="bg-card rounded-lg p-6 border border-gray-100">
                   <h3 className="text-xl font-semibold text-text-primary mb-4">Key Metrics</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    {startup.keyMetrics.map((metric, index) => (
+                    {(startup.keyMetrics || []).map((metric, index) => (
                       <div key={index} className="text-center p-4 bg-gray-50 rounded-lg">
                         <div className="text-2xl font-bold text-primary">{metric.value}</div>
                         <div className="text-sm text-text-secondary">{metric.label}</div>
@@ -228,7 +228,7 @@ export default function StartupProfilePage() {
 
             {activeTab === 'reviews' && (
               <div className="space-y-4">
-                {startup.reviews.map((review) => (
+                {(startup.reviews || []).map((review) => (
                   <div key={review.id} className="bg-card rounded-lg p-6 border border-gray-100">
                     <div className="flex items-start space-x-4">
                       <Image
@@ -263,7 +263,7 @@ export default function StartupProfilePage() {
 
             {activeTab === 'milestones' && (
               <div className="space-y-4">
-                {startup.milestones.map((milestone, index) => (
+                {(startup.milestones || []).map((milestone, index) => (
                   <div key={index} className="bg-card rounded-lg p-6 border border-gray-100">
                     <div className="flex items-start space-x-4">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -323,7 +323,7 @@ export default function StartupProfilePage() {
             <div className="bg-card rounded-lg p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-text-primary mb-4">Connect</h3>
               <div className="space-y-3">
-                {startup.socialLinks.linkedin && (
+                {startup.socialLinks?.linkedin && (
                   <Link
                     href={startup.socialLinks.linkedin}
                     target="_blank"
@@ -333,7 +333,7 @@ export default function StartupProfilePage() {
                     <span>LinkedIn</span>
                   </Link>
                 )}
-                {startup.socialLinks.twitter && (
+                {startup.socialLinks?.twitter && (
                   <Link
                     href={startup.socialLinks.twitter}
                     target="_blank"
@@ -343,7 +343,7 @@ export default function StartupProfilePage() {
                     <span>Twitter</span>
                   </Link>
                 )}
-                {startup.socialLinks.facebook && (
+                {startup.socialLinks?.facebook && (
                   <Link
                     href={startup.socialLinks.facebook}
                     target="_blank"

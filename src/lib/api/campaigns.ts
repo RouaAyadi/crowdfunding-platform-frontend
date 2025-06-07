@@ -49,7 +49,7 @@ export interface CampaignsResponse {
 
 class CampaignAPI {
   private async request(endpoint: string, options: RequestInit = {}) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth-token');
     
     const config: RequestInit = {
       headers: {

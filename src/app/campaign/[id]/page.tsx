@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import Image from "next/image";
 import FundingProgress from "./components/FundingProgress";
 import CampaignDetails from "./components/CampaignDetails";
@@ -6,43 +10,67 @@ import InvestCard from "./components/InvestCard";
 import ShareButton from "./components/ShareButton";
 import { campaignStatus } from "@/lib/enums";
 import Navbar from "@/components/Navbar";
+import { useCampaign } from "@/hooks/useCampaigns";
+import { calculateCampaignProgress } from "@/lib/campaignUtils";
 
-export default async function Campaign({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const { id } = await params;
-	// const campaign = await getCampaign(id);
-	// mock data for campaign
-	const campaign = {
-		id: "1",
-		startupName: "Startup Name",
-		startupId: "5",
-		name: "Revolutionary Blockchain Solution for Supply Chain",
-		description:
-			"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus tempus velit velit, quis fermentum elit interdum eu. Quisque est diam, imperdiet eu mattis quis, aliquet ac nulla. Nam eu quam vel velit porta blandit nec eget mi. Aliquam semper quam ante, mattis condimentum sem dignissim sit amet. Donec interdum consectetur nisl elementum condimentum.",
-		logo: "/default-startup-logo.svg",
-		progress: 45,
-		fundingGoal: 100,
-		objective: "Buy 30 servers",
-		startDate: new Date(2025, 5, 25),
-		endDate: new Date(2025, 7, 2),
-		investors: 128,
-		minimumInvestment: 0.05,
-		rating: 4.5,
-		status: campaignStatus.Active,
-	};
+export default function Campaign() {
+	const params = useParams();
+	const { campaign, loading, error, refetch } = useCampaign(params.id as string);
+
+	// Show loading state
+	if (loading) {
+		return (
+			<div className="min-h-screen bg-bg">
+				<Navbar />
+				<div className="flex items-center justify-center h-64">
+					<div className="text-text-secondary">Loading campaign...</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Show error state
+	if (error) {
+		return (
+			<div className="min-h-screen bg-bg">
+				<Navbar />
+				<div className="flex flex-col items-center justify-center h-64">
+					<div className="text-red-500 mb-4">Error: {error}</div>
+					<button
+						onClick={() => refetch()}
+						className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
+					>
+						Try Again
+					</button>
+				</div>
+			</div>
+		);
+	}
+
+	// Show not found state
+	if (!campaign) {
+		return (
+			<div className="min-h-screen bg-bg">
+				<Navbar />
+				<div className="flex items-center justify-center h-64">
+					<div className="text-text-secondary">Campaign not found</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Calculate campaign progress and days left
+	const { progressPercentage, daysLeft } = calculateCampaignProgress(campaign);
 
 	let statusClassName;
 	switch (campaign.status) {
-		case campaignStatus.Funded:
+		case 'funded':
 			statusClassName = "text-accent bg-accent/10";
 			break;
-		case campaignStatus.Failed:
+		case 'failed':
 			statusClassName = "text-red-600 bg-red-600/10";
 			break;
-		case campaignStatus.Active:
+		case 'active':
 		default:
 			statusClassName = "text-primary bg-primary/10";
 	}
@@ -58,8 +86,8 @@ export default async function Campaign({
 							<div className="space-y-2">
 								<div className="flex items-center gap-4">
 									<Image
-										src={campaign.logo}
-										alt="Startup Logo"
+										src={campaign.image || "/default-startup-logo.svg"}
+										alt="Campaign Image"
 										width={36}
 										height={36}
 										className="rounded-lg border border-text-secondary/20"
@@ -69,7 +97,7 @@ export default async function Campaign({
 									</h4>
 								</div>
 								<h1 className="text-3xl font-bold text-text-primary">
-									{campaign.name}
+									{campaign.title || campaign.name}
 								</h1>
 							</div>
 							<div className="flex items-center gap-3">
@@ -89,21 +117,18 @@ export default async function Campaign({
 					<div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
 						<aside className="space-y-8">
 							<FundingProgress
-								goal={campaign.fundingGoal}
-								investors={campaign.investors}
-								progress={campaign.progress}
-								daysLeft={Math.round(
-									(campaign.endDate.getTime() - new Date().getTime()) /
-										(1000 * 60 * 60 * 24)
-								)}
-								minInvestment={campaign.minimumInvestment}
+								goal={campaign.targetAmount || campaign.goalAmount}
+								investors={campaign.backers}
+								progress={progressPercentage}
+								daysLeft={daysLeft}
+								minInvestment={0.05} // TODO: Add minimum investment to backend
 							/>
 							<CampaignDetails
 								description={campaign.description}
-								startDate={campaign.startDate}
-								endDate={campaign.endDate}
-								objective={campaign.objective}
-								rating={campaign.rating}
+								startDate={new Date(campaign.startDate)}
+								endDate={new Date(campaign.endDate)}
+								objective={campaign.description} // TODO: Add objective field to backend
+								rating={4.5} // TODO: Add rating calculation to backend
 								startupId={campaign.startupId}
 							/>
 							<Comments />

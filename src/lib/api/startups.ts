@@ -21,7 +21,7 @@ export interface StartupsResponse {
 
 class StartupAPI {
   private async request(endpoint: string, options: RequestInit = {}) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth-token');
     
     const config: RequestInit = {
       headers: {
@@ -82,50 +82,50 @@ class StartupAPI {
 
   private transformStartupForFrontend(backendStartup: any): Startup {
     return {
-      _id: backendStartup._id,
-      id: backendStartup._id,
+      _id: backendStartup._id || backendStartup.id,
+      id: backendStartup.id || backendStartup._id,
       walletAddress: backendStartup.walletAddress,
-      role: backendStartup.role,
+      role: 'startup' as const,
       name: backendStartup.name,
       location: backendStartup.location,
       firstFundedDate: backendStartup.firstFundedDate,
       website: backendStartup.website,
-      logoUrl: backendStartup.logoUrl,
-      logo: backendStartup.logoUrl || backendStartup.logo, // Frontend compatibility
+      logoUrl: backendStartup.logo,
+      logo: backendStartup.logo, // Frontend compatibility
       coverImage: backendStartup.coverImage || '/placeholder-startup-cover.jpg',
       field: backendStartup.field,
-      bio: backendStartup.bio,
-      description: backendStartup.bio, // Frontend compatibility
-      longDescription: backendStartup.longDescription || backendStartup.bio,
-      missionGoals: backendStartup.missionGoals || [],
-      motives: backendStartup.missionGoals || [], // Frontend compatibility
+      bio: backendStartup.description, // Backend uses 'description' field
+      description: backendStartup.description, // Frontend compatibility
+      longDescription: backendStartup.longDescription || backendStartup.description,
+      missionGoals: backendStartup.motives || [], // Backend uses 'motives' field
+      motives: backendStartup.motives || [], // Frontend compatibility
       foundedYear: backendStartup.foundedYear,
       teamSize: backendStartup.teamSize,
       socialLinks: backendStartup.socialLinks || {},
-      campaigns: backendStartup.campaigns || [],
+      campaigns: (backendStartup.campaigns || []).map((campaign: any) => campaign._id || campaign.id || campaign),
       reviews: (backendStartup.reviews || []).map((review: any) => ({
-        id: review._id,
+        id: review._id || review.id,
         investorName: review.reviewer?.name || 'Anonymous',
         investorAvatar: review.reviewer?.avatar || '/placeholder-avatar.jpg',
-        rating: review.rating,
-        comment: review.content,
-        date: new Date(review.createdAt || Date.now()).toISOString().split('T')[0],
+        rating: review.rating || 0,
+        comment: review.content || '',
+        date: review.createdAt ? new Date(review.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         investmentAmount: review.investmentAmount || 0,
       })),
-      totalRaised: backendStartup.totalRaised || 0,
+      totalRaised: backendStartup.totalFundsRaised || 0, // Backend uses 'totalFundsRaised'
       activeCampaigns: backendStartup.activeCampaigns || 0,
       completedCampaigns: backendStartup.completedCampaigns || 0,
       averageRating: backendStartup.averageRating || 0,
-      totalReviews: backendStartup.reviews?.length || 0,
+      totalReviews: backendStartup.totalReviews || (backendStartup.reviews?.length) || 0,
       keyMetrics: backendStartup.keyMetrics || [],
       milestones: (backendStartup.milestones || []).map((milestone: any) => ({
         title: milestone.title,
         description: milestone.description,
-        date: new Date(milestone.date).toISOString().split('T')[0],
-        completed: milestone.completed,
+        date: milestone.date ? new Date(milestone.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        completed: milestone.completed || false,
       })),
-      createdAt: backendStartup.createdAt,
-      updatedAt: backendStartup.updatedAt,
+      createdAt: backendStartup.createdAt || new Date().toISOString(),
+      updatedAt: backendStartup.updatedAt || new Date().toISOString(),
     };
   }
 }

@@ -13,7 +13,7 @@ export default function LoginPage() {
 
 	const handleLogin = async () => {
 		try {
-			await login();
+			await login(role);
 		} catch (error) {
 			// Error is already handled in the auth context
 			console.error(error);
