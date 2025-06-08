@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { RiSearchLine, RiNotificationLine, RiUserLine, RiMenuLine } from '@remixicon/react';
 import { useState } from 'react';
+import WalletConnect from './WalletConnect';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -65,6 +66,9 @@ export default function Navbar() {
             <button className="p-2 text-text-secondary hover:text-primary">
               <RiUserLine className="h-5 w-5" />
             </button>
+
+            {/* Wallet Connect */}
+            <WalletConnect />
 
             {/* Start Campaign Button */}
             <Link

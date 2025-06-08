@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
+import { Web3Provider } from "@/contexts/Web3Context";
 
 export const metadata: Metadata = {
 	title: "CrowdFund - Startup Crowdfunding Platform",
@@ -15,7 +16,9 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${GeistSans.className} antialiased bg-bg`}>
-				{children}
+				<Web3Provider>
+					{children}
+				</Web3Provider>
 			</body>
 		</html>
 	);
